@@ -19,26 +19,32 @@ trait EntrustUserTrait
     {
         $userPrimaryKey = $this->primaryKey;
         $cacheKey = 'entrust_roles_for_user_'.$this->$userPrimaryKey;
-        return Cache::tags(Config::get('entrust.role_user_table'))->remember($cacheKey, Config::get('cache.ttl'), function () {
+        /*return Cache::tags(Config::get('entrust.role_user_table'))->remember($cacheKey, Config::get('cache.ttl'), function () {
+            return $this->roles()->get();
+        });*/
+        return Cache::remember('entrust_roles_for_user_'.$this->{$this->primaryKey}, Config::get('cache.ttl'), function () {
             return $this->roles()->get();
         });
     }
     public function save(array $options = [])
     {   //both inserts and updates
         $result = parent::save($options);
-        Cache::tags(Config::get('entrust.role_user_table'))->flush();
+        //Cache::tags(Config::get('entrust.role_user_table'))->flush();
+        Cache::forget('entrust_roles_for_user_'.$this->{$this->primaryKey});
         return $result;
     }
     public function delete(array $options = [])
     {   //soft or hard
         $result = parent::delete($options);
-        Cache::tags(Config::get('entrust.role_user_table'))->flush();
+        //Cache::tags(Config::get('entrust.role_user_table'))->flush();
+        Cache::forget('entrust_roles_for_user_'.$this->{$this->primaryKey});
         return $result;
     }
     public function restore()
     {   //soft delete undo's
         $result = parent::restore();
-        Cache::tags(Config::get('entrust.role_user_table'))->flush();
+        //Cache::tags(Config::get('entrust.role_user_table'))->flush();
+        Cache::forget('entrust_roles_for_user_'.$this->{$this->primaryKey});
         return $result;
     }
     
